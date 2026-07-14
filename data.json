@@ -31,6 +31,22 @@
       "issue": "",
       "nextAction": "태극당 미팅 진행(7/16/목)",
       "link": ""
+    },
+    {
+      "id": "w_mrkcruhsgy7dp",
+      "date": "2026-07-14",
+      "deadline": "2026-07-22",
+      "launchDate": "2026-09",
+      "brand": "29'",
+      "project": "추석 프로모션",
+      "content": "디자이너 전달 필요(판가 / 부자재 사용가능 범위 원가 / 발주 수량 / 구성 품목)",
+      "taskType": "기획",
+      "collab": "디자인팀 나예은님",
+      "status": "진행중",
+      "priority": 2,
+      "issue": "GWP 개발 관련 어떻게 진행될 지 확인",
+      "nextAction": "",
+      "link": ""
     }
   ],
   "memos": {
