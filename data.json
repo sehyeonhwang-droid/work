@@ -15,6 +15,22 @@
       "launchDate": null,
       "brand": "29'",
       "link": ""
+    },
+    {
+      "id": "w_mrkcol7qzpo2d",
+      "date": "2026-07-14",
+      "deadline": null,
+      "launchDate": "2027-02",
+      "brand": "29'",
+      "project": "태극당IP 콜라보",
+      "content": "태극당 협업 제안서 작성",
+      "taskType": "기획",
+      "collab": "",
+      "status": "완료",
+      "priority": 3,
+      "issue": "",
+      "nextAction": "태극당 미팅 진행(7/16/목)",
+      "link": ""
     }
   ],
   "memos": {}
