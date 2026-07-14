@@ -1,4 +1,21 @@
 {
-  "entries": [],
+  "entries": [
+    {
+      "id": "w_mrkcn4gyics7o",
+      "date": "2026-07-06",
+      "project": "29' 하반기 신제품",
+      "taskType": "기획",
+      "content": "하반기 신제품 기획안 작성",
+      "collab": "",
+      "status": "진행중",
+      "priority": 3,
+      "issue": "",
+      "nextAction": "보고",
+      "deadline": "2026-07-08",
+      "launchDate": null,
+      "brand": "무탠다드뷰티",
+      "link": ""
+    }
+  ],
   "memos": {}
 }
