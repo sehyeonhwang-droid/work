@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>업무 로그</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="업무 로그">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#14251F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg:#F2F2ED;
+    --bg-grid: #E9E9E2;
+    --surface:#FFFFFF;
+    --surface-2:#FAFAF6;
+    --ink:#20242B;
+    --muted:#767A73;
+    --faint:#A7ABA3;
+    --border:#E1E1D8;
+    --border-strong:#CFCFC2;
+    --progress:#1F6F5C;
+    --progress-bg:#E7F1EE;
+    --hold:#B5651D;
+    --hold-bg:#F7ECDF;
+    --done:#8B8D85;
+    --done-bg:#EFEFE9;
+    --tracking:#4A5FBF;
+    --tracking-bg:#EAECF8;
+    --danger:#B3261E;
+    --danger-bg:#FBEAE9;
+    --star:#C9A227;
+    --accent-ink:#14251F;
+    --radius:10px;
+    --shadow: 0 1px 2px rgba(32,36,43,0.04), 0 4px 14px rgba(32,36,43,0.05);
+    --shadow-lg: 0 8px 30px rgba(32,36,43,0.12);
+    font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  button, input, select, textarea{ font-family:inherit; letter-spacing:normal; }
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0/100% 28px,
+      var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .app{max-width:1180px;margin:0 auto;padding:0 20px 80px;}
+
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    backdrop-filter: blur(8px);
+    background: rgba(242,242,237,0.88);
+    border-bottom:1px solid var(--border-strong);
+  }
+  .topbar-inner{
+    max-width:1180px;margin:0 auto;padding:16px 20px 0;
+  }
+  .brand-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;flex-direction:column;gap:2px;}
+  .brand .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:0.16em; color:var(--muted); text-transform:uppercase;
+  }
+  .brand h1{margin:0; font-size:26px; font-weight:900; letter-spacing:-0.02em;}
+  .brand h1 .dot{color:var(--progress);}
+  .add-btn{
+    display:flex; align-items:center; gap:6px;
+    background:var(--accent-ink); color:#F4F4EE; border:none;
+    padding:11px 18px; border-radius:999px; font-size:14px; font-weight:600;
+    cursor:pointer; box-shadow:var(--shadow); transition:transform .15s ease, box-shadow .15s ease;
+    white-space:nowrap;
+  }
+  .add-btn:hover{transform:translateY(-1px); box-shadow:var(--shadow-lg);}
+  .backup-btn{
+    background:var(--surface); color:var(--muted); border:1px solid var(--border-strong);
+    padding:9px 14px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;
+  }
+  .backup-btn:hover{color:var(--ink); border-color:var(--ink);}
+  .file-btn.connected{color:var(--progress); border-color:var(--progress); background:var(--progress-bg);}
+  .file-btn.warn{color:var(--hold); border-color:var(--hold); background:var(--hold-bg);}
+  .tabs{display:flex; gap:4px; margin-top:18px;}
+  .tab{
+    padding:10px 4px; margin-right:22px; font-size:14.5px; font-weight:600; color:var(--muted);
+    border:none; background:none; cursor:pointer; position:relative; top:1px;
+    border-bottom:2px solid transparent;
+  }
+  .tab.active{color:var(--ink); border-bottom-color:var(--accent-ink);}
+  .tab .cnt{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--faint); margin-left:4px;
+  }
+  .tab.active .cnt{color:var(--progress);}
+
+  .section-title{
+    display:flex; align-items:baseline; gap:10px; margin:28px 0 14px;
+  }
+  .section-title h2{font-size:16px; margin:0; font-weight:700;}
+  .section-title .sub{font-size:12.5px; color:var(--muted);}
+
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:20px;}
+  .stat-row.cols-4{grid-template-columns:repeat(4,1fr);}
+  .stat-row.cols-5{grid-template-columns:repeat(5,1fr);}
+  .stat-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; box-shadow:var(--shadow);
+  }
+  .stat-card .label{font-size:12px; color:var(--muted); font-weight:600;}
+  .stat-card .value{font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700; margin-top:4px;}
+  .stat-card.progress .value{color:var(--progress);}
+  .stat-card.tracking .value{color:var(--tracking);}
+  .stat-card.hold .value{color:var(--hold);}
+  .stat-card.danger .value{color:var(--danger);}
+
+  .board{display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap:14px; align-items:start; margin-top:6px;}
+  .board-col{background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:14px; min-height:120px;}
+  .board-col-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .board-col-head .title{display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700;}
+  .swatch{width:9px; height:9px; border-radius:2px;}
+  .swatch.progress{background:var(--progress);}
+  .swatch.tracking{background:var(--tracking);}
+  .swatch.hold{background:var(--hold);}
+  .swatch.done{background:var(--done);}
+  .board-col-head .count{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted);
+    background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:1px 9px;
+  }
+  .cards{display:flex; flex-direction:column; gap:10px;}
+  .task-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    padding:12px 13px 11px; cursor:pointer; position:relative; border-left:4px solid var(--faint);
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .task-card:hover{box-shadow:var(--shadow-lg); transform:translateY(-1px);}
+  .task-card.st-진행중{border-left-color:var(--progress);}
+  .task-card.st-지속트래킹{border-left-color:var(--tracking);}
+  .task-card.st-이월{border-left-color:var(--hold);}
+  .task-card.st-보류{border-left-color:var(--hold);}
+  .task-card.st-완료{border-left-color:var(--done); opacity:0.82;}
+  .tc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .tc-project{font-size:11.5px; font-weight:700; color:var(--progress); background:var(--progress-bg); padding:2px 7px; border-radius:5px; display:inline-block;}
+  .task-card.st-이월 .tc-project, .task-card.st-보류 .tc-project{color:var(--hold); background:var(--hold-bg);}
+  .task-card.st-완료 .tc-project{color:var(--done); background:var(--done-bg);}
+  .task-card.st-지속트래킹 .tc-project{color:var(--tracking); background:var(--tracking-bg);}
+  .tc-date{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--faint);}
+  .tc-content{font-size:13.5px; font-weight:500; margin-top:7px; line-height:1.4; color:var(--ink);}
+  .tc-bottom{display:flex; align-items:center; justify-content:space-between; margin-top:9px;}
+  .tc-stars{color:var(--star); font-size:11px; letter-spacing:1px;}
+  .tc-dday{font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; padding:2px 7px; border-radius:5px;}
+  .tc-dday.ok{color:var(--muted); background:var(--surface-2);}
+  .tc-dday.soon{color:var(--hold); background:var(--hold-bg);}
+  .tc-dday.over{color:var(--danger); background:var(--danger-bg);}
+  .empty-hint{color:var(--faint); font-size:12.5px; padding:20px 6px; text-align:center;}
+
+  .week-nav{
+    display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px;
+  }
+  .week-nav button{
+    background:var(--surface); border:1px solid var(--border-strong); border-radius:8px;
+    width:34px; height:34px; cursor:pointer; font-size:15px; color:var(--ink);
+  }
+  .week-nav button:hover{background:var(--surface-2);}
+  .week-range{
+    font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; min-width:230px; text-align:center;
+  }
+  .week-today-btn{
+    background:none; border:1px solid var(--border-strong); border-radius:20px; padding:6px 14px; font-size:12px;
+    color:var(--muted); cursor:pointer; font-weight:600; white-space:nowrap; letter-spacing:normal;
+    font-family:'Pretendard', sans-serif; line-height:1;
+  }
+  .week-today-btn:hover{color:var(--ink); border-color:var(--ink);}
+
+  table{width:100%; border-collapse:collapse; background:var(--surface); border-radius:10px; overflow:hidden; border:1px solid var(--border);}
+  thead th{
+    text-align:left; font-size:11.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.03em;
+    padding:10px 12px; background:var(--surface-2); border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  tbody td{padding:10px 12px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr.clickable{cursor:pointer;}
+  tbody tr.clickable:hover{background:var(--surface-2);}
+  tbody tr.highlight{animation: flash 1.6s ease;}
+  @keyframes flash{
+    0%{background:#FCE9C9;} 100%{background:transparent;}
+  }
+  .status-pill{
+    font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:20px; display:inline-block; white-space:nowrap;
+  }
+  .status-pill.진행중{color:var(--progress); background:var(--progress-bg);}
+  .status-pill.지속트래킹{color:var(--tracking); background:var(--tracking-bg);}
+  .status-pill.완료{color:var(--done); background:var(--done-bg);}
+  .status-pill.이월{color:var(--hold); background:var(--hold-bg);}
+  .status-pill.보류{color:var(--hold); background:var(--hold-bg);}
+  .brand-tag{
+    font-size:11px; font-weight:700; padding:2px 8px; border-radius:5px; display:inline-block; white-space:nowrap;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .brand-tag.bmuse{color:#3A5A8C; background:#E9EEF7;}
+  .brand-tag.b29{color:#8C4A2F; background:#F7ECE5;}
+
+  .launch-timeline{display:flex; flex-direction:column; gap:30px; margin-top:22px;}
+  .launch-month-head{display:flex; align-items:baseline; gap:10px; margin-bottom:14px; position:relative; padding-bottom:10px;}
+  .launch-month-head:after{content:''; position:absolute; left:0; right:0; bottom:0; height:1px; background:var(--border-strong);}
+  .launch-month-label{font-size:20px; font-weight:900; letter-spacing:-0.01em; color:var(--ink);}
+  .launch-month-count{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted);}
+  .launch-month.unscheduled .launch-month-label{color:var(--faint);}
+  .launch-chips{display:flex; flex-wrap:wrap; gap:12px;}
+  .launch-chip{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+    min-width:168px; max-width:230px; cursor:pointer; border-top:3px solid var(--faint);
+    box-shadow:var(--shadow); transition: transform .15s ease, box-shadow .15s ease;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .launch-chip:hover{transform:translateY(-2px); box-shadow:var(--shadow-lg);}
+  .launch-chip .brand-tag{align-self:flex-start;}
+  .launch-chip.st-진행중{border-top-color:var(--progress);}
+  .launch-chip.st-지속트래킹{border-top-color:var(--tracking);}
+  .launch-chip.st-이월, .launch-chip.st-보류{border-top-color:var(--hold);}
+  .launch-chip.st-완료{border-top-color:var(--done); opacity:0.8;}
+  .launch-chip-name{font-size:14px; font-weight:700; line-height:1.35; color:var(--ink);}
+  .launch-chip-meta{font-size:11.5px; color:var(--muted); display:flex; align-items:center; gap:5px;}
+  .stars-inline{color:var(--star); font-size:12px;}
+  .memo-box{
+    margin-top:16px; background:var(--surface-2); border:1px dashed var(--border-strong); border-radius:10px; padding:14px 16px;
+  }
+  .memo-label{font-size:11.5px; color:var(--muted); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+  .save-status{font-weight:600; font-family:'JetBrains Mono',monospace; font-size:10.5px;}
+  .save-status.pending{color:var(--faint);}
+  .save-status.ok{color:var(--progress);}
+  .save-status.err{color:var(--danger);}
+  .memo-toolbar{display:flex; align-items:center; gap:4px; margin-bottom:8px;}
+  .memo-toolbar button{
+    width:28px; height:28px; border:1px solid var(--border-strong); background:var(--surface); border-radius:6px;
+    cursor:pointer; font-size:12.5px; color:var(--ink); display:flex; align-items:center; justify-content:center;
+  }
+  .memo-toolbar button:hover{background:var(--bg); border-color:var(--ink);}
+  .memo-toolbar-sep{width:1px; height:18px; background:var(--border-strong); margin:0 4px;}
+  .memo-editor{
+    width:100%; min-height:90px; font-size:13.5px; font-family:'Pretendard', sans-serif; color:var(--ink);
+    outline:none; line-height:1.7; padding:2px 2px;
+  }
+  .memo-editor:empty:before{ content: attr(data-placeholder); color:var(--faint); }
+  .memo-editor u{text-decoration:underline;}
+  .memo-editor ul{margin:4px 0; padding-left:20px;}
+
+  .memo-list{display:flex; flex-direction:column; gap:12px; margin-top:6px;}
+  .memo-list-item{
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; box-shadow:var(--shadow);
+  }
+  .memo-list-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .memo-list-range{font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:var(--muted);}
+  .memo-list-body{font-size:13.5px; line-height:1.7; color:var(--ink);}
+  .memo-list-body ul{margin:4px 0; padding-left:20px;}
+  .memo-list-body u{text-decoration:underline;}
+
+  .filter-bar{display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; align-items:center;}
+  .filter-bar input[type=text], .filter-bar select{
+    border:1px solid var(--border-strong); background:var(--surface); border-radius:8px; padding:8px 12px;
+    font-size:13px; color:var(--ink); font-family:inherit; outline:none;
+  }
+  .filter-bar input[type=text]{flex:1; min-width:160px;}
+  .filter-bar input[type=text]:focus, .filter-bar select:focus{border-color:var(--accent-ink);}
+  .table-wrap{overflow-x:auto; margin-top:14px; border-radius:10px;}
+  .row-actions{display:flex; gap:6px;}
+  .icon-btn{
+    border:1px solid var(--border-strong); background:var(--surface); border-radius:6px; width:26px; height:26px;
+    cursor:pointer; font-size:12px; color:var(--muted); display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover{color:var(--ink); border-color:var(--ink);}
+  .link-a{color:var(--progress); text-decoration:none; font-size:12px;}
+  .link-a:hover{text-decoration:underline;}
+  .muted-cell{color:var(--faint);}
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(20,22,17,0.45); display:none; align-items:flex-start; justify-content:center;
+    z-index:100; padding:40px 16px; overflow-y:auto;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--surface); border-radius:14px; padding:24px 26px 22px; width:100%; max-width:560px;
+    box-shadow:var(--shadow-lg); margin-bottom:40px;
+  }
+  .modal h3{margin:0 0 4px; font-size:18px; font-weight:800;}
+  .modal .modal-sub{font-size:12.5px; color:var(--muted); margin-bottom:18px;}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .form-grid .full{grid-column:1/-1;}
+  .field label{font-size:12px; font-weight:700; color:var(--muted); display:block; margin-bottom:5px;}
+  .field input, .field select, .field textarea{
+    width:100%; border:1px solid var(--border-strong); border-radius:8px; padding:9px 10px; font-size:13.5px;
+    font-family:inherit; outline:none; color:var(--ink); background:var(--surface-2);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--accent-ink); background:var(--surface);}
+  .field textarea{resize:vertical; min-height:60px;}
+  .star-picker{display:flex; gap:6px;}
+  .star-picker button{
+    border:1px solid var(--border-strong); background:var(--surface-2); border-radius:8px; padding:8px 0; flex:1;
+    cursor:pointer; font-size:14px; color:var(--faint);
+  }
+  .star-picker button.sel{background:#FBF3DC; border-color:var(--star); color:var(--star);}
+  .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:20px;}
+  .btn{border:none; border-radius:8px; padding:10px 16px; font-size:13.5px; font-weight:700; cursor:pointer;}
+  .btn.primary{background:var(--accent-ink); color:#F4F4EE;}
+  .btn.ghost{background:none; color:var(--muted); border:1px solid var(--border-strong);}
+  .btn.danger{background:var(--danger-bg); color:var(--danger);}
+  .btn.primary:hover{opacity:0.9;}
+
+  @media (max-width:860px){
+    .board{grid-template-columns:1fr;}
+    .stat-row, .stat-row.cols-4, .stat-row.cols-5{grid-template-columns:repeat(2,1fr);}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-row">
+      <div class="brand">
+        <span class="eyebrow">Weekly Worklog</span>
+        <h1>업무 로그<span class="dot">.</span></h1>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <span class="backup-btn file-btn" id="cloudStatus" title="GitHub 저장소에 자동 저장됩니다">☁️ 연결 중…</span>
+        <button class="backup-btn" id="exportBtn" title="전체 데이터를 파일로 저장">📤 백업 저장</button>
+        <button class="backup-btn" id="importBtn" title="백업 파일 복원 또는 업무 JSON 파일 추가">📥 가져오기</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
+        <button class="add-btn" id="openAddBtn">+ 업무 추가</button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab" data-tab="dashboard">대시보드</button>
+      <button class="tab" data-tab="launch">런칭 플랜</button>
+      <button class="tab" data-tab="weekly">주간 뷰</button>
+      <button class="tab" data-tab="memos">메모장</button>
+      <button class="tab" data-tab="log">업무 로그<span class="cnt" id="logCount"></span></button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <div id="view-dashboard"></div>
+  <div id="view-launch" style="display:none;"></div>
+  <div id="view-weekly" style="display:none;"></div>
+  <div id="view-memos" style="display:none;"></div>
+  <div id="view-log" style="display:none;"></div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">업무 추가</h3>
+    <div class="modal-sub">업무 로그에 새 항목을 기록합니다.</div>
+    <div class="form-grid" id="formGrid">
+      <div class="field"><label>날짜</label><input type="date" id="f_date"></div>
+      <div class="field"><label>마감일</label><input type="date" id="f_deadline"></div>
+      <div class="field"><label>브랜드</label>
+        <select id="f_brand">
+          <option value="">선택 안 함</option>
+          <option value="무탠다드뷰티">무탠다드뷰티</option>
+          <option value="29'">29'</option>
+        </select>
+      </div>
+      <div class="field"><label>프로젝트</label><input type="text" id="f_project" placeholder="예: 29' 하반기 신제품"></div>
+      <div class="field"><label>업무유형</label><input type="text" id="f_taskType" placeholder="예: 기획 / 카피 / 디자인 검수"></div>
+      <div class="field full"><label>업무내용</label><textarea id="f_content" placeholder="구체적인 업무 내용을 적어주세요"></textarea></div>
+      <div class="field"><label>협업/담당</label><input type="text" id="f_collab" placeholder="예: 디자인팀 김OO"></div>
+      <div class="field"><label>상태</label>
+        <select id="f_status">
+          <option value="진행중">진행중</option>
+          <option value="지속트래킹">지속트래킹</option>
+          <option value="완료">완료</option>
+          <option value="이월">이월</option>
+          <option value="보류">보류</option>
+        </select>
+      </div>
+      <div class="field"><label>런칭목표월</label><input type="month" id="f_launchDate"></div>
+      <div class="field"><label>우선순위</label>
+        <div class="star-picker" id="starPicker">
+          <button type="button" data-v="1">★</button>
+          <button type="button" data-v="2">★★</button>
+          <button type="button" data-v="3">★★★</button>
+        </div>
+      </div>
+      <div class="field full"><label>이슈/보류사유</label><input type="text" id="f_issue" placeholder="진행 중 이슈나 보류 사유"></div>
+      <div class="field full"><label>다음 액션</label><input type="text" id="f_nextAction" placeholder="예: 보고, 시안 컨펌 요청 등"></div>
+      <div class="field full"><label>링크/자료</label><input type="text" id="f_link" placeholder="https://..."></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" id="deleteBtn" style="display:none;">삭제</button>
+      <button class="btn ghost" id="cancelBtn">취소</button>
+      <button class="btn primary" id="saveBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  const DAY_NAMES = ['일','월','화','수','목','금','토'];
+  let entries = [];
+  let currentTab = 'dashboard';
+  let editingId = null;
+  let selectedStar = 2;
+  let currentWeekStart = getWeekStart(todayStr());
+  let pendingHighlight = null;
+  let logFilters = { q:'', status:'전체', project:'전체', brand:'전체' };
+  const memoCache = {};
+
+  function uid(){ return 'w_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  function todayStr(){ return fmtDate(new Date()); }
+  function fmtDate(d){
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function parseDate(s){ if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+  function addDays(dateStr, n){ const d=parseDate(dateStr); d.setDate(d.getDate()+n); return fmtDate(d); }
+  function getWeekStart(dateStr){
+    const d = parseDate(dateStr);
+    const dow = d.getDay();
+    const diffToMon = (dow===0? -6 : 1-dow);
+    d.setDate(d.getDate()+diffToMon);
+    return fmtDate(d);
+  }
+  function dayName(dateStr){ return DAY_NAMES[parseDate(dateStr).getDay()]; }
+  function fmtDisplay(dateStr){
+    if(!dateStr) return '-';
+    const d = parseDate(dateStr);
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function ddayInfo(deadline){
+    if(!deadline) return null;
+    const t = parseDate(todayStr()); const dl = parseDate(deadline);
+    const diff = Math.round((dl-t)/86400000);
+    let label, cls;
+    if(diff<0){ label = `D+${-diff}`; cls='over'; }
+    else if(diff===0){ label='D-day'; cls='soon'; }
+    else if(diff<=3){ label=`D-${diff}`; cls='soon'; }
+    else { label=`D-${diff}`; cls='ok'; }
+    return {label, cls};
+  }
+  function stars(n){ return '★'.repeat(n||0) + '☆'.repeat(3-(n||0)); }
+  function esc(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // ================= 저장 레이어 (GitHub + api/data.js) =================
+  // 이 웹페이지는 비밀번호나 열쇠를 전혀 갖고 있지 않아요.
+  // "/api/data" 라는 우리 집 심부름꾼한테 "불러와줘" / "저장해줘"라고만 부탁해요.
+  // 진짜 열쇠(GitHub 토큰)는 Vercel 서버 안에만 숨겨져 있어서 안전해요.
+
+  function setCloudStatus(state, msg){
+    const el = document.getElementById('cloudStatus');
+    if(!el) return;
+    if(state==='ok'){ el.textContent = msg || '☁️ 저장됨'; el.className='backup-btn file-btn connected'; }
+    else if(state==='pending'){ el.textContent = msg || '☁️ 저장 중…'; el.className='backup-btn file-btn'; }
+    else if(state==='err'){ el.textContent = msg || '☁️ 저장 실패'; el.className='backup-btn file-btn warn'; }
+    else { el.textContent = msg || '☁️ 미설정'; el.className='backup-btn file-btn warn'; }
+  }
+
+  async function cloudLoad(){
+    try{
+      const r = await fetch('/api/data');
+      const data = await r.json();
+      if(!r.ok || data.error){
+        console.error('불러오기 실패', data.error);
+        setCloudStatus('err', '⚠️ ' + (data.error || '불러오기 실패'));
+        return null;
+      }
+      return data;
+    }catch(e){
+      console.error('불러오기 실패', e);
+      setCloudStatus('err');
+      return null;
+    }
+  }
+
+  let saveTimer = null;
+  function scheduleCloudSave(){
+    setCloudStatus('pending');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(cloudSaveNow, 800);
+  }
+  async function cloudSaveNow(){
+    try{
+      const r = await fetch('/api/data', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ entries, memos: memoCache })
+      });
+      const data = await r.json().catch(()=>({}));
+      if(!r.ok || data.error){
+        console.error('저장 실패', data.error);
+        setCloudStatus('err', '⚠️ ' + (data.error || '저장 실패'));
+        return false;
+      }
+      setCloudStatus('ok');
+      return true;
+    }catch(e){
+      console.error('저장 실패', e);
+      setCloudStatus('err');
+      return false;
+    }
+  }
+
+  function seedData(){
+    return [{
+      id: uid(),
+      date: '2026-07-06',
+      project: "29' 하반기 신제품",
+      taskType: '기획',
+      content: '하반기 신제품 기획안 작성',
+      collab: '',
+      status: '진행중',
+      priority: 3,
+      issue: '',
+      nextAction: '보고',
+      deadline: '2026-07-08',
+      launchDate: null,
+      brand: '무탠다드뷰티',
+      link: ''
+    }];
+  }
+
+  async function loadEntries(){
+    setCloudStatus('pending', '☁️ 불러오는 중…');
+    const payload = await cloudLoad();
+    if(payload && Array.isArray(payload.entries)){
+      entries = payload.entries;
+      if(payload.memos) Object.assign(memoCache, payload.memos);
+      setCloudStatus('ok');
+      if(entries.length===0){
+        // data.json이 비어있는 첫 실행 상태 → 예시 데이터를 넣고 한 번 저장
+        entries = seedData();
+        await cloudSaveNow();
+      }
+    } else {
+      entries = seedData();
+    }
+  }
+  async function saveEntries(){
+    scheduleCloudSave();
+  }
+
+  function render(){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===currentTab));
+    document.getElementById('view-dashboard').style.display = currentTab==='dashboard'?'block':'none';
+    document.getElementById('view-launch').style.display = currentTab==='launch'?'block':'none';
+    document.getElementById('view-weekly').style.display = currentTab==='weekly'?'block':'none';
+    document.getElementById('view-memos').style.display = currentTab==='memos'?'block':'none';
+    document.getElementById('view-log').style.display = currentTab==='log'?'block':'none';
+    document.getElementById('logCount').textContent = entries.length? `(${entries.length})` : '';
+
+    if(currentTab==='dashboard') renderDashboard();
+    if(currentTab==='launch') renderLaunchPlan();
+    if(currentTab==='weekly') renderWeekly();
+    if(currentTab==='memos') renderMemos();
+    if(currentTab==='log') renderLog();
+  }
+
+  function goToLog(id){
+    pendingHighlight = id;
+    currentTab = 'log';
+    render();
+  }
+
+  function renderDashboard(){
+    const el = document.getElementById('view-dashboard');
+    const inProgress = entries.filter(e=>e.status==='진행중');
+    const tracking = entries.filter(e=>e.status==='지속트래킹');
+    const hold = entries.filter(e=>e.status==='이월'||e.status==='보류');
+    const done = entries.filter(e=>e.status==='완료').slice().sort((a,b)=> (b.date||'').localeCompare(a.date||'')).slice(0,8);
+    const dueSoon = entries.filter(e=>{
+      if(e.status==='완료' || !e.deadline) return false;
+      const info = ddayInfo(e.deadline);
+      return info && (info.cls==='soon' || info.cls==='over');
+    });
+
+    function sortByUrgency(list){
+      return list.slice().sort((a,b)=>{
+        const da = a.deadline || '9999-99-99', db = b.deadline || '9999-99-99';
+        return da.localeCompare(db);
+      });
+    }
+
+    el.innerHTML = `
+      <div class="section-title"><h2>지금 진행 중인 업무</h2><span class="sub">한눈에 보고, 클릭하면 업무 로그로 이동합니다</span></div>
+      <div class="stat-row cols-5">
+        <div class="stat-card progress"><div class="label">진행중</div><div class="value">${inProgress.length}</div></div>
+        <div class="stat-card tracking"><div class="label">지속트래킹</div><div class="value">${tracking.length}</div></div>
+        <div class="stat-card danger"><div class="label">마감 임박·초과</div><div class="value">${dueSoon.length}</div></div>
+        <div class="stat-card hold"><div class="label">이월·보류</div><div class="value">${hold.length}</div></div>
+        <div class="stat-card"><div class="label">전체 업무</div><div class="value">${entries.length}</div></div>
+      </div>
+
+      <div class="board" style="margin-top:22px;">
+        ${boardColumn('진행중', 'progress', sortByUrgency(inProgress))}
+        ${boardColumn('지속트래킹', 'tracking', sortByUrgency(tracking))}
+        ${boardColumn('이월 · 보류', 'hold', sortByUrgency(hold))}
+        ${boardColumn('완료 (최근)', 'done', done)}
+      </div>
+    `;
+    el.querySelectorAll('.task-card').forEach(card=>{
+      card.addEventListener('click', ()=> goToLog(card.dataset.id));
+    });
+  }
+
+  function boardColumn(title, kind, list){
+    return `
+      <div class="board-col">
+        <div class="board-col-head">
+          <div class="title"><span class="swatch ${kind}"></span>${title}</div>
+          <span class="count">${list.length}</span>
+        </div>
+        <div class="cards">
+          ${list.length? list.map(taskCard).join('') : `<div class="empty-hint">해당 업무가 없습니다</div>`}
+        </div>
+      </div>
+    `;
+  }
+
+  function taskCard(e){
+    const dd = ddayInfo(e.deadline);
+    return `
+      <div class="task-card st-${e.status}" data-id="${e.id}">
+        <div class="tc-top">
+          <span class="tc-project">${esc(e.project)||'미분류'}</span>
+          <span class="tc-date">${e.date?fmtDisplay(e.date).slice(5):''}</span>
+        </div>
+        ${e.brand? `<span class="brand-tag ${e.brand==="29'"?'b29':'bmuse'}" style="margin-top:6px;">${esc(e.brand)}</span>` : ''}
+        <div class="tc-content">${esc(e.content)||'(내용 없음)'}</div>
+        <div class="tc-bottom">
+          <span class="tc-stars">${stars(e.priority)}</span>
+          ${dd? `<span class="tc-dday ${dd.cls}">${dd.label}</span>` : `<span class="tc-dday ok">기한 없음</span>`}
+        </div>
+      </div>
+    `;
+  }
+
+  const STATUS_ORDER = ['진행중','지속트래킹','이월','보류','완료'];
+  function buildLaunchItems(){
+    const byProject = {};
+    entries.forEach(e=>{
+      if(!e.project) return;
+      if(!byProject[e.project]) byProject[e.project] = { project:e.project, launchDate:null, brand:null, tasks:[] };
+      byProject[e.project].tasks.push(e);
+      if(e.launchDate) byProject[e.project].launchDate = e.launchDate;
+      if(e.brand) byProject[e.project].brand = e.brand;
+    });
+    return Object.values(byProject);
+  }
+  function renderLaunchPlan(){
+    const el = document.getElementById('view-launch');
+    const items = buildLaunchItems();
+    const withDate = items.filter(i=>i.launchDate).sort((a,b)=> a.launchDate.localeCompare(b.launchDate));
+    const noDate = items.filter(i=>!i.launchDate);
+
+    const byMonth = {};
+    withDate.forEach(i=>{
+      const key = i.launchDate.slice(0,7);
+      if(!byMonth[key]) byMonth[key] = [];
+      byMonth[key].push(i);
+    });
+    const months = Object.keys(byMonth).sort();
+
+    function dominantStatusClass(tasks){
+      const counts = {};
+      tasks.forEach(t=> counts[t.status] = (counts[t.status]||0)+1);
+      let top = STATUS_ORDER[0], max = -1;
+      STATUS_ORDER.forEach(s=>{ if((counts[s]||0)>max){ max=counts[s]||0; top=s; } });
+      return top;
+    }
+    function launchChip(item){
+      const st = dominantStatusClass(item.tasks);
+      return `
+        <div class="launch-chip st-${st}" data-project="${esc(item.project)}">
+          ${item.brand? `<span class="brand-tag ${item.brand==="29'"?'b29':'bmuse'}">${esc(item.brand)}</span>` : ''}
+          <div class="launch-chip-name">${esc(item.project)}</div>
+          <div class="launch-chip-meta">${item.tasks.length}건 · <span class="status-pill ${st}" style="padding:1px 7px;">${st}</span></div>
+        </div>
+      `;
+    }
+
+    el.innerHTML = `
+      <div class="section-title"><h2>런칭 플랜</h2><span class="sub">품목(프로젝트)을 런칭 목표월 기준으로 정리합니다 · 카드를 클릭하면 해당 프로젝트의 업무 로그로 이동해요</span></div>
+      <div class="launch-timeline">
+        ${months.length? months.map(m=>{
+          const [y,mo] = m.split('-');
+          return `
+          <div class="launch-month">
+            <div class="launch-month-head">
+              <span class="launch-month-label">${y}년 ${Number(mo)}월</span>
+              <span class="launch-month-count">${byMonth[m].length}개 품목</span>
+            </div>
+            <div class="launch-chips">${byMonth[m].map(launchChip).join('')}</div>
+          </div>`;
+        }).join('') : `<div class="empty-hint" style="margin-top:20px;">런칭목표월이 등록된 품목이 없습니다. 업무 추가/수정에서 런칭목표월을 입력해보세요.</div>`}
+
+        ${noDate.length? `
+          <div class="launch-month unscheduled">
+            <div class="launch-month-head">
+              <span class="launch-month-label">일정 미정</span>
+              <span class="launch-month-count">${noDate.length}개 품목</span>
+            </div>
+            <div class="launch-chips">${noDate.map(launchChip).join('')}</div>
+          </div>` : ''}
+      </div>
+    `;
+    el.querySelectorAll('.launch-chip').forEach(chip=> chip.addEventListener('click', ()=>{
+      logFilters.q=''; logFilters.status='전체'; logFilters.project = chip.dataset.project;
+      currentTab='log'; render();
+    }));
+  }
+
+  function renderWeekly(){
+    const el = document.getElementById('view-weekly');
+    const weekStart = currentWeekStart;
+    const weekEnd = addDays(weekStart, 6);
+    const weekItems = entries.filter(e=> e.date && e.date>=weekStart && e.date<=weekEnd)
+      .slice().sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+    const carry = entries.filter(e=> (e.status==='이월'||e.status==='보류') && e.date && e.date>=weekStart && e.date<=weekEnd);
+
+    const total = weekItems.length;
+    const done = weekItems.filter(e=>e.status==='완료').length;
+    const progress = weekItems.filter(e=>e.status==='진행중').length;
+    const held = weekItems.filter(e=>e.status==='이월'||e.status==='보류').length;
+
+    el.innerHTML = `
+      <div class="section-title"><h2>주간 업무 일지</h2><span class="sub">주차를 선택하면 해당 주의 업무가 표시됩니다</span></div>
+      <div class="week-nav">
+        <button id="prevWeek">‹</button>
+        <div class="week-range">${fmtDisplay(weekStart)} (${dayName(weekStart)}) ~ ${fmtDisplay(weekEnd)} (${dayName(weekEnd)})</div>
+        <button id="nextWeek">›</button>
+        <button class="week-today-btn" id="thisWeek">이번 주</button>
+      </div>
+
+      <div class="stat-row cols-4" style="margin-top:20px;">
+        <div class="stat-card"><div class="label">총 업무</div><div class="value">${total}</div></div>
+        <div class="stat-card"><div class="label">완료</div><div class="value">${done}</div></div>
+        <div class="stat-card progress"><div class="label">진행중</div><div class="value">${progress}</div></div>
+        <div class="stat-card hold"><div class="label">이월·보류</div><div class="value">${held}</div></div>
+      </div>
+
+      <div class="section-title"><h2>이번 주 업무 리스트</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>날짜</th><th>요일</th><th>프로젝트</th><th>업무유형</th><th>업무내용</th><th>상태</th><th>우선순위</th><th>마감일</th>
+          </tr></thead>
+          <tbody>
+            ${weekItems.length? weekItems.map(e=>`
+              <tr class="clickable" data-id="${e.id}">
+                <td class="mono">${fmtDisplay(e.date)}</td>
+                <td>${dayName(e.date)}</td>
+                <td>${esc(e.project)}</td>
+                <td>${esc(e.taskType)}</td>
+                <td>${esc(e.content)}</td>
+                <td><span class="status-pill ${e.status}">${e.status}</span></td>
+                <td class="stars-inline">${stars(e.priority)}</td>
+                <td class="mono">${e.deadline? fmtDisplay(e.deadline):'-'}</td>
+              </tr>
+            `).join('') : `<tr><td colspan="8" class="empty-hint">이번 주 등록된 업무가 없습니다</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title"><h2>다음 주로 넘길 항목</h2><span class="sub">이월·보류 상태 업무</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>프로젝트</th><th>업무내용</th><th>상태</th><th>이슈/보류사유</th><th>다음 액션</th><th>마감일</th></tr></thead>
+          <tbody>
+            ${carry.length? carry.map(e=>`
+              <tr class="clickable" data-id="${e.id}">
+                <td>${esc(e.project)}</td>
+                <td>${esc(e.content)}</td>
+                <td><span class="status-pill ${e.status}">${e.status}</span></td>
+                <td>${esc(e.issue)||'-'}</td>
+                <td>${esc(e.nextAction)||'-'}</td>
+                <td class="mono">${e.deadline? fmtDisplay(e.deadline):'-'}</td>
+              </tr>
+            `).join('') : `<tr><td colspan="6" class="empty-hint">이월할 항목이 없습니다</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="memo-box">
+        <div class="memo-label">📝 주간 메모 · ${weekStart} <span class="save-status" id="memoSaveStatus"></span></div>
+        <div class="memo-toolbar" id="memoToolbar">
+          <button type="button" data-cmd="bold" title="굵게"><b>B</b></button>
+          <button type="button" data-cmd="italic" title="기울임"><i>I</i></button>
+          <button type="button" data-cmd="underline" title="밑줄"><u>U</u></button>
+          <span class="memo-toolbar-sep"></span>
+          <button type="button" data-cmd="insertUnorderedList" title="목록">≡</button>
+        </div>
+        <div class="memo-editor" id="weekMemo" contenteditable="true" data-placeholder="이번 주 핵심 이슈 / 보고 필요 사항 / 다음 주 우선순위를 자유롭게 작성하세요."></div>
+      </div>
+    `;
+
+    document.getElementById('prevWeek').onclick = ()=>{ currentWeekStart = addDays(currentWeekStart,-7); renderWeekly(); };
+    document.getElementById('nextWeek').onclick = ()=>{ currentWeekStart = addDays(currentWeekStart,7); renderWeekly(); };
+    document.getElementById('thisWeek').onclick = ()=>{ currentWeekStart = getWeekStart(todayStr()); renderWeekly(); };
+    el.querySelectorAll('tr.clickable').forEach(row=> row.addEventListener('click', ()=> goToLog(row.dataset.id)));
+
+    const memoEl = document.getElementById('weekMemo');
+    const statusEl = document.getElementById('memoSaveStatus');
+    memoEl.innerHTML = sanitizeHtml(getMemo(weekStart));
+
+    let memoTimer=null;
+    function scheduleMemoSave(){
+      statusEl.textContent = '저장 중…';
+      statusEl.className = 'save-status pending';
+      clearTimeout(memoTimer);
+      memoTimer = setTimeout(async ()=>{
+        const ok = await setMemo(weekStart, memoEl.innerHTML);
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2,'0'), mm = String(now.getMinutes()).padStart(2,'0');
+        if(ok){
+          statusEl.textContent = `자동 저장됨 · ${hh}:${mm}`;
+          statusEl.className = 'save-status ok';
+        } else {
+          statusEl.textContent = '저장 실패 — 인터넷 연결과 GitHub 설정을 확인해주세요';
+          statusEl.className = 'save-status err';
+        }
+      }, 400);
+    }
+    memoEl.addEventListener('input', scheduleMemoSave);
+    memoEl.addEventListener('keydown', (e)=>{
+      if(e.key !== 'Enter') return;
+      const sel = window.getSelection();
+      if(!sel.rangeCount) return;
+      const node = sel.anchorNode;
+      const li = node && (node.nodeType===1 ? node.closest('li') : node.parentElement && node.parentElement.closest('li'));
+      if(li && li.textContent.trim()===''){
+        e.preventDefault();
+        document.execCommand('insertUnorderedList', false, null);
+        document.execCommand('formatBlock', false, 'p');
+        scheduleMemoSave();
+      }
+    });
+    document.getElementById('memoToolbar').querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('mousedown', (e)=> e.preventDefault());
+      btn.addEventListener('click', ()=>{
+        document.execCommand(btn.dataset.cmd, false, null);
+        memoEl.focus();
+        scheduleMemoSave();
+      });
+    });
+  }
+
+  function sanitizeHtml(html){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    tmp.querySelectorAll('script,style,iframe,object,embed').forEach(node=> node.remove());
+    tmp.querySelectorAll('*').forEach(node=>{
+      [...node.attributes].forEach(attr=>{
+        if(/^on/i.test(attr.name)) node.removeAttribute(attr.name);
+      });
+    });
+    return tmp.innerHTML;
+  }
+
+  function getMemo(weekStart){ return memoCache[weekStart] || ''; }
+  async function setMemo(weekStart, html){
+    memoCache[weekStart] = html;
+    return await cloudSaveNow();
+  }
+  async function preloadMemo(weekStart){
+    if(currentTab==='weekly') renderWeekly();
+  }
+
+  function renderMemos(){
+    const el = document.getElementById('view-memos');
+    const memos = memoCache;
+    const weeks = Object.keys(memos)
+      .filter(w=> memos[w] && memos[w].replace(/<[^>]*>/g,'').trim().length>0)
+      .sort((a,b)=> b.localeCompare(a));
+
+    el.innerHTML = `
+      <div class="section-title"><h2>메모장</h2><span class="sub">모든 주간 메모를 한 곳에서 모아봅니다</span></div>
+      <div class="memo-list">
+        ${weeks.length? weeks.map(w=>{
+          const end = addDays(w,6);
+          return `
+          <div class="memo-list-item" data-week="${w}">
+            <div class="memo-list-head">
+              <span class="memo-list-range">${fmtDisplay(w)} ~ ${fmtDisplay(end)}</span>
+              <button class="icon-btn memo-goto" data-week="${w}" title="이 주로 이동">↗</button>
+            </div>
+            <div class="memo-list-body">${sanitizeHtml(memos[w])}</div>
+          </div>`;
+        }).join('') : `<div class="empty-hint">아직 작성된 메모가 없습니다. 주간 뷰에서 메모를 남겨보세요.</div>`}
+      </div>
+    `;
+    el.querySelectorAll('.memo-goto').forEach(btn=> btn.addEventListener('click', ()=>{
+      currentWeekStart = btn.dataset.week; currentTab='weekly'; render();
+    }));
+  }
+
+  function renderLog(){
+    const el = document.getElementById('view-log');
+    const projects = Array.from(new Set(entries.map(e=>e.project).filter(Boolean)));
+    let list = entries.slice().sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+    if(logFilters.q){
+      const q = logFilters.q.toLowerCase();
+      list = list.filter(e=> (e.project+e.content+e.collab+e.taskType).toLowerCase().includes(q));
+    }
+    if(logFilters.status!=='전체') list = list.filter(e=> e.status===logFilters.status);
+    if(logFilters.project!=='전체') list = list.filter(e=> e.project===logFilters.project);
+    if(logFilters.brand!=='전체') list = list.filter(e=> (e.brand||'미지정')===logFilters.brand);
+
+    el.innerHTML = `
+      <div class="section-title"><h2>업무 로그</h2><span class="sub">날짜별로 누적된 전체 업무 기록입니다</span></div>
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="프로젝트, 업무내용, 담당자로 검색" value="${esc(logFilters.q)}">
+        <select id="brandFilter">
+          <option ${logFilters.brand==='전체'?'selected':''}>전체</option>
+          <option ${logFilters.brand==='무탠다드뷰티'?'selected':''}>무탠다드뷰티</option>
+          <option ${logFilters.brand==="29'"?'selected':''}>29'</option>
+          <option ${logFilters.brand==='미지정'?'selected':''}>미지정</option>
+        </select>
+        <select id="statusFilter">
+          ${['전체','진행중','지속트래킹','완료','이월','보류'].map(s=>`<option ${logFilters.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <select id="projectFilter">
+          <option ${logFilters.project==='전체'?'selected':''}>전체</option>
+          ${projects.map(p=>`<option ${logFilters.project===p?'selected':''}>${esc(p)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>날짜</th><th>요일</th><th>브랜드</th><th>프로젝트</th><th>업무유형</th><th>업무내용</th><th>협업/담당</th>
+            <th>상태</th><th>우선순위</th><th>이슈/보류사유</th><th>다음 액션</th><th>마감일</th><th>링크</th><th></th>
+          </tr></thead>
+          <tbody id="logTbody">
+            ${list.length? list.map(rowHtml).join('') : `<tr><td colspan="15" class="empty-hint">조건에 맞는 업무가 없습니다</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    document.getElementById('searchInput').oninput = (e)=>{ logFilters.q = e.target.value; renderLog(); };
+    document.getElementById('statusFilter').onchange = (e)=>{ logFilters.status = e.target.value; renderLog(); };
+    document.getElementById('projectFilter').onchange = (e)=>{ logFilters.project = e.target.value; renderLog(); };
+    document.getElementById('brandFilter').onchange = (e)=>{ logFilters.brand = e.target.value; renderLog(); };
+
+    el.querySelectorAll('.row-edit').forEach(b=> b.addEventListener('click', (ev)=>{ ev.stopPropagation(); openModal(b.dataset.id); }));
+    el.querySelectorAll('.row-del').forEach(b=> b.addEventListener('click', (ev)=>{ ev.stopPropagation(); deleteEntry(b.dataset.id); }));
+
+    if(pendingHighlight){
+      const row = el.querySelector(`tr[data-id="${pendingHighlight}"]`);
+      if(row){
+        row.classList.add('highlight');
+        setTimeout(()=> row.scrollIntoView({behavior:'smooth', block:'center'}), 30);
+        setTimeout(()=> row.classList.remove('highlight'), 1700);
+      }
+      pendingHighlight = null;
+    }
+  }
+
+  function rowHtml(e){
+    const dd = ddayInfo(e.deadline);
+    return `
+      <tr data-id="${e.id}">
+        <td class="mono">${e.date? fmtDisplay(e.date):'-'}</td>
+        <td>${e.date? dayName(e.date):'-'}</td>
+        <td>${e.brand? `<span class="brand-tag ${e.brand==="29'"?'b29':'bmuse'}">${esc(e.brand)}</span>` : '<span class="muted-cell">-</span>'}</td>
+        <td>${esc(e.project)||'<span class="muted-cell">-</span>'}</td>
+        <td>${esc(e.taskType)||'<span class="muted-cell">-</span>'}</td>
+        <td style="min-width:180px;">${esc(e.content)}</td>
+        <td>${esc(e.collab)||'<span class="muted-cell">-</span>'}</td>
+        <td><span class="status-pill ${e.status}">${e.status}</span></td>
+        <td class="stars-inline">${stars(e.priority)}</td>
+        <td>${esc(e.issue)||'<span class="muted-cell">-</span>'}</td>
+        <td>${esc(e.nextAction)||'<span class="muted-cell">-</span>'}</td>
+        <td class="mono" style="color:${dd&&dd.cls==='over'?'var(--danger)':(dd&&dd.cls==='soon'?'var(--hold)':'inherit')}">${e.deadline? fmtDisplay(e.deadline):'-'}</td>
+        <td>${e.link? `<a class="link-a" href="${esc(e.link)}" target="_blank" rel="noopener">열기</a>` : '<span class="muted-cell">-</span>'}</td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn row-edit" data-id="${e.id}" title="수정">✎</button>
+            <button class="icon-btn row-del" data-id="${e.id}" title="삭제">✕</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  async function deleteEntry(id){
+    if(!confirm('이 업무 항목을 삭제할까요?')) return;
+    entries = entries.filter(e=>e.id!==id);
+    await saveEntries();
+    render();
+  }
+
+  function openModal(id){
+    editingId = id || null;
+    const e = id ? entries.find(x=>x.id===id) : null;
+    document.getElementById('modalTitle').textContent = e ? '업무 수정' : '업무 추가';
+    document.getElementById('f_date').value = e? e.date||'' : todayStr();
+    document.getElementById('f_deadline').value = e? e.deadline||'' : '';
+    document.getElementById('f_launchDate').value = e && e.launchDate ? e.launchDate.slice(0,7) : '';
+    document.getElementById('f_brand').value = e? e.brand||'' : '';
+    document.getElementById('f_project').value = e? e.project||'' : '';
+    document.getElementById('f_taskType').value = e? e.taskType||'' : '';
+    document.getElementById('f_content').value = e? e.content||'' : '';
+    document.getElementById('f_collab').value = e? e.collab||'' : '';
+    document.getElementById('f_status').value = e? e.status||'진행중' : '진행중';
+    document.getElementById('f_issue').value = e? e.issue||'' : '';
+    document.getElementById('f_nextAction').value = e? e.nextAction||'' : '';
+    document.getElementById('f_link').value = e? e.link||'' : '';
+    selectedStar = e? (e.priority||2) : 2;
+    updateStarPicker();
+    document.getElementById('deleteBtn').style.display = e? 'inline-block':'none';
+    document.getElementById('modalBackdrop').classList.add('open');
+  }
+  function closeModal(){ document.getElementById('modalBackdrop').classList.remove('open'); editingId=null; }
+  function updateStarPicker(){
+    document.querySelectorAll('#starPicker button').forEach(b=> b.classList.toggle('sel', Number(b.dataset.v)<=selectedStar));
+  }
+  document.getElementById('starPicker').addEventListener('click', (e)=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    selectedStar = Number(btn.dataset.v); updateStarPicker();
+  });
+  document.getElementById('f_project').addEventListener('input', ()=>{
+    if(editingId) return;
+    const val = document.getElementById('f_project').value.trim();
+    if(!val) return;
+    const match = entries.find(x=> x.project===val && x.launchDate);
+    const launchInput = document.getElementById('f_launchDate');
+    if(match && !launchInput.value) launchInput.value = match.launchDate.slice(0,7);
+    const brandMatch = entries.find(x=> x.project===val && x.brand);
+    const brandInput = document.getElementById('f_brand');
+    if(brandMatch && !brandInput.value) brandInput.value = brandMatch.brand;
+  });
+
+  async function saveModal(){
+    const project = document.getElementById('f_project').value.trim();
+    const content = document.getElementById('f_content').value.trim();
+    if(!content){ alert('업무내용을 입력해주세요.'); return; }
+    const data = {
+      date: document.getElementById('f_date').value || null,
+      deadline: document.getElementById('f_deadline').value || null,
+      launchDate: document.getElementById('f_launchDate').value || null,
+      brand: document.getElementById('f_brand').value || null,
+      project, content,
+      taskType: document.getElementById('f_taskType').value.trim(),
+      collab: document.getElementById('f_collab').value.trim(),
+      status: document.getElementById('f_status').value,
+      priority: selectedStar,
+      issue: document.getElementById('f_issue').value.trim(),
+      nextAction: document.getElementById('f_nextAction').value.trim(),
+      link: document.getElementById('f_link').value.trim(),
+    };
+    if(editingId){
+      const idx = entries.findIndex(x=>x.id===editingId);
+      entries[idx] = {...entries[idx], ...data};
+    } else {
+      entries.push({ id: uid(), ...data });
+    }
+    await saveEntries();
+    closeModal();
+    render();
+  }
+
+  function exportBackup(){
+    const backup = { exportedAt: new Date().toISOString(), entries, memos: memoCache };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `worklog-backup-${todayStr()}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+  function normalizeImportedEntry(raw){
+    return {
+      id: raw.id || uid(),
+      date: raw.date || null,
+      deadline: raw.deadline || null,
+      launchDate: raw.launchDate || null,
+      brand: raw.brand || null,
+      project: raw.project || '',
+      taskType: raw.taskType || '',
+      content: raw.content || '',
+      collab: raw.collab || '',
+      status: raw.status || '진행중',
+      priority: raw.priority!=null ? raw.priority : 2,
+      issue: raw.issue || '',
+      nextAction: raw.nextAction || '',
+      link: raw.link || '',
+    };
+  }
+
+  async function importBackup(file){
+    let data;
+    try{
+      const text = await file.text();
+      data = JSON.parse(text);
+    }catch(e){
+      alert('JSON 파일을 읽을 수 없습니다: ' + e.message);
+      return;
+    }
+
+    if(Array.isArray(data)){
+      const incoming = data.map(normalizeImportedEntry);
+      const existingIds = new Set(entries.map(e=>e.id));
+      const toAdd = incoming.filter(e=> !existingIds.has(e.id));
+      const skipped = incoming.length - toAdd.length;
+      if(toAdd.length===0){ alert('추가할 새 업무가 없습니다 (이미 모두 등록되어 있어요).'); return; }
+      if(!confirm(`업무 ${toAdd.length}건을 추가할까요?${skipped? ` (중복 ${skipped}건 제외)`:''}`)) return;
+      entries = entries.concat(toAdd);
+      await saveEntries();
+      alert(`업무 ${toAdd.length}건을 추가했습니다.`);
+      render();
+      return;
+    }
+
+    if(data && Array.isArray(data.entries)){
+      if(!confirm(`백업 파일(${data.exportedAt||'날짜 미상'})을 불러올까요?\n현재 데이터는 덮어씌워집니다.`)) return;
+      entries = data.entries.map(normalizeImportedEntry);
+      if(data.memos) Object.assign(memoCache, data.memos);
+      await saveEntries();
+      alert('백업을 복원했습니다.');
+      render();
+      return;
+    }
+
+    alert('인식할 수 없는 파일 형식입니다.\n업무 배열(JSON) 또는 이 앱에서 내보낸 백업 파일만 지원해요.');
+  }
+
+  document.getElementById('openAddBtn').addEventListener('click', ()=> openModal(null));
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.getElementById('saveBtn').addEventListener('click', saveModal);
+  document.getElementById('deleteBtn').addEventListener('click', ()=>{ if(editingId) deleteEntry(editingId); closeModal(); });
+  document.getElementById('modalBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='modalBackdrop') closeModal(); });
+  document.getElementById('tabs').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.tab'); if(!btn) return;
+    currentTab = btn.dataset.tab; render();
+    if(currentTab==='weekly') preloadMemo(currentWeekStart);
+  });
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(file) importBackup(file);
+    e.target.value = '';
+  });
+
+  (async function init(){
+    await loadEntries();
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
