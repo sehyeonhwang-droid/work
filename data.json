@@ -47,6 +47,22 @@
       "issue": "GWP 개발 관련 어떻게 진행될 지 확인",
       "nextAction": "",
       "link": ""
+    },
+    {
+      "id": "w_mrlq91na4vgmd",
+      "date": "2026-07-13",
+      "deadline": "2026-07-15",
+      "launchDate": "2026-10",
+      "brand": "29'",
+      "project": "헤어 퍼퓸 미스트",
+      "content": "개발의뢰서 작성",
+      "taskType": "기획",
+      "collab": "",
+      "status": "완료",
+      "priority": 3,
+      "issue": "",
+      "nextAction": "",
+      "link": ""
     }
   ],
   "memos": {
